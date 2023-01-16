@@ -17,7 +17,6 @@ M.setup = function()
   M.namespace_id = vim.api.nvim_create_namespace("PommodoroClock")
 end
 
-
 ---
 -- A table of modes that can be used to set the timer.
 --
@@ -41,30 +40,29 @@ M.current_state = {
   popup = nil,
 }
 
---[[
-  Start a short break.
-]]
+--- Starts a short break.
+-- @treturn nil
 M.start_short_break = function()
   M.current_state.mode = M.modes["short_break"]
   M.start_timer()
 end
 
---[[
-  Start a long break.
-]]
+--- Starts a long break.
+-- @treturn nil
 M.start_long_break = function()
   M.current_state.mode = M.modes["long_break"]
   M.start_timer()
 end
 
---[[
-  Start a work session.
-]]
+--- Starts a work session.
+-- @treturn nil
 M.start_work = function()
   M.current_state.mode = M.modes["work"]
   M.start_timer()
 end
 
+--- Toggles the pause state of the current timer.
+-- @treturn nil
 M.toggle_pause = function()
   if M.current_state.timer == nil then
     return
