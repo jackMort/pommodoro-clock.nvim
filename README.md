@@ -28,14 +28,15 @@ use({
 
 ## Usage
 
-Plugin exposes the following public functions, here is a sample of the keybindings.
+Plugin exposes the following public functions, here is a sample of the keybindings using [which-key](https://github.com/folke/which-key.nvim).
 
 ```lua
 local function pc(func)
   return "<Cmd>lua require('pommodoro-clock')." .. func .. "()<CR>"
 end
 
-lvim.builtin.which_key.mappings["k"] = {
+p = {
+  name = "Pommodoro",
   w = { pc("start_work"), "Start Pommodoro" },
   s = { pc("start_short_break"), "Short Break" },
   l = { pc("start_long_break"), "Long Break" },
