@@ -4,6 +4,9 @@ local Utils = require("pommodoro-clock.utils")
 
 local M = {}
 
+--- Sets up the highlight groups for the pommodoro clock.
+--
+-- @return nil
 M.setup = function()
   vim.api.nvim_set_hl(0, "PommodoroClockG1", { fg = "#ccff33" })
   vim.api.nvim_set_hl(0, "PommodoroClockG2", { fg = "#9ef01a" })
@@ -14,12 +17,24 @@ M.setup = function()
   M.namespace_id = vim.api.nvim_create_namespace("PommodoroClock")
 end
 
+
+---
+-- A table of modes that can be used to set the timer.
+--
+-- @table modes
+-- @field work A table containing the name and duration of a work mode.
+-- @field short_break A table containing the name and duration of a short break mode.
+-- @field long_break A table containing the name and duration of a long break mode.
 M.modes = {
   ["work"] = { "POMMODORO", 25 },
   ["short_break"] = { "SHORT BREAK", 5 },
   ["long_break"] = { "LONG BREAK", 30 },
 }
 
+--- Sets the current state of the application.
+-- @param mode The mode of the application.
+-- @param time The time of the application.
+-- @param popup The popup of the application.
 M.current_state = {
   mode = M.modes["work"],
   time = nil,
@@ -63,6 +78,8 @@ M.toggle_pause = function()
   end
 end
 
+--- Closes the current popup and stops the timer
+-- @return nil
 M.close = function()
   if M.current_state.timer then
     M.current_state.timer:stop()
@@ -76,6 +93,11 @@ M.close = function()
   M.say("See you later")
 end
 
+--- Starts the timer.
+--
+-- If the timer is already running, it will be stopped.
+--
+-- @return nil
 M.start_timer = function()
   if M.current_state.timer ~= nil then
     M.current_state.timer:stop()
@@ -93,6 +115,12 @@ M.start_timer = function()
   M.current_state.timer:start(0, 1000, vim.schedule_wrap(M.tick))
 end
 
+---
+-- @function tick
+-- @desc This function is called every second by the timer. It updates the
+--       popup buffer with the current time remaining.
+-- @param none
+-- @return none
 M.tick = function()
   if M.current_state.time == 0 then
     M.current_state.timer:stop()
