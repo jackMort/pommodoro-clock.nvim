@@ -16,7 +16,7 @@ Users can set a timer, view a countdown, and pause/resume the timer.
 use({
   "jackMort/pommodoro-clock.nvim",
     config = function()
-      require("chatgpt").setup({
+      require("pommodoro-clock").setup({
         -- optional configuration
       })
     end,
