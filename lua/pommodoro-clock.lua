@@ -50,6 +50,19 @@ M.start_work = function()
   M.start_timer()
 end
 
+M.toggle_pause = function()
+  if M.current_state.timer == nil then
+    return
+  end
+  if M.current_state.paused then
+    M.current_state.paused = false
+    M.current_state.timer:start(0, 1000, vim.schedule_wrap(M.tick))
+  else
+    M.current_state.paused = true
+    M.current_state.timer:stop()
+  end
+end
+
 M.close = function()
   if M.current_state.timer then
     M.current_state.timer:stop()
@@ -107,12 +120,14 @@ M.tick = function()
     vim.api.nvim_buf_del_extmark(M.current_state.popup.bufnr, M.namespace_id, M.current_state.extmark_id)
   end
 
+  local paused_text = M.current_state.paused and "           PAUSED" or ""
+
   M.current_state.extmark_id = vim.api.nvim_buf_set_extmark(M.current_state.popup.bufnr, M.namespace_id, 0, 0, {
     virt_text = {
-
       { "░░ ", "PommodoroClockG1" },
       { M.current_state.mode[1] .. " ", "PommodoroClockText" },
       { M.current_state.mode[2] .. "MIN", "PommodoroClockMin" },
+      { paused_text, "PommodoroClockText" },
     },
     virt_text_pos = "overlay",
   })
