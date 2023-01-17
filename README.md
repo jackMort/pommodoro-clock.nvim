@@ -7,7 +7,7 @@
 `Pommodoro-Clock` is a plugin that displays an ASCII timer in an overlay. It helps users stay focused and productive by using the Pomodoro Technique.
 Users can set a timer, view a countdown, and pause/resume the timer.
 
-![preview image](https://github.com/jackMort/pommodoro-clock.nvim/blob/media/preview.png?raw=true)
+![preview image](https://github.com/jackMort/pommodoro-clock.nvim/blob/media/preview.gif?raw=true)
 
 ## Installation
 
