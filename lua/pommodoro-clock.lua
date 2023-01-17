@@ -1,8 +1,21 @@
 local Popup = require("nui.popup")
 
+local Animation = require("pommodoro-clock.animation")
 local Utils = require("pommodoro-clock.utils")
 
 local M = {}
+
+---
+-- @table config
+--
+-- @field number animation_duration
+-- @field number animation_fps
+M.config = {
+  animation_duration = 300,
+  animation_fps = 30,
+  width = 38,
+  height = 4,
+}
 
 --- Sets up the highlight groups for the pommodoro clock.
 --
@@ -76,9 +89,11 @@ M.toggle_pause = function()
   if M.current_state.paused then
     M.current_state.paused = false
     M.current_state.timer:start(0, 1000, vim.schedule_wrap(M.tick))
+    M.say_event("unpaused")
   else
     M.current_state.paused = true
     M.current_state.timer:stop()
+    M.say_event("paused")
   end
 
   M.render()
@@ -93,8 +108,18 @@ M.close = function()
   end
 
   if M.current_state.popup then
-    M.current_state.popup:unmount()
-    M.current_state.popup = nil
+    local animation = Animation:initialize(M.config.animation_duration, M.config.animation_fps, function(fraction)
+      M.current_state.popup:update_layout({
+        size = {
+          width = M.config.width + 1 - math.floor(M.config.width * fraction),
+          height = M.config.height,
+        },
+      })
+    end, function()
+      M.current_state.popup:unmount()
+      M.current_state.popup = nil
+    end)
+    animation:run()
   end
 
   M.say("See you later")
@@ -112,15 +137,13 @@ M.start_timer = function()
     M.current_state.timer:stop()
   end
 
-  local mode = M.current_state.mode[1]
-  local mode_time = M.current_state.mode[2]
-
   M.show_popup()
-  M.say_event(mode, "start")
+  M.current_state.time = M.current_state.mode[2] * 60
 
-  M.current_state.time = mode_time * 60
+  M.render()
+  M.say_event("start")
+
   M.current_state.timer = vim.loop.new_timer()
-
   M.current_state.timer:start(0, 1000, vim.schedule_wrap(M.tick))
 end
 
@@ -133,7 +156,7 @@ end
 M.tick = function()
   if M.current_state.time == 0 then
     M.current_state.timer:stop()
-    M.say_event(M.current_state.mode[1], "end")
+    M.say_event("end")
   end
 
   M.render()
@@ -188,8 +211,8 @@ M.show_popup = function()
     M.current_state.popup = Popup({
       position = { row = 0, col = "100%" },
       size = {
-        width = 38,
-        height = 4,
+        width = 1,
+        height = M.config.height,
       },
       focusable = false,
       relative = "win",
@@ -205,12 +228,22 @@ M.show_popup = function()
         winhighlight = "Normal:,FloatBorder:",
       },
     })
+
     M.current_state.popup:mount()
+    local animation = Animation:initialize(M.config.animation_duration, M.config.animation_fps, function(fraction)
+      M.current_state.popup:update_layout({
+        size = {
+          width = math.floor(M.config.width * fraction),
+          height = M.config.height,
+        },
+      })
+    end)
+    animation:run()
   end
 end
 
-M.say_event = function(mode, type)
-  M.say(mode .. " session " .. type)
+M.say_event = function(type)
+  M.say(M.current_state.mode[1] .. " session " .. type)
 end
 
 M.say = function(text)
