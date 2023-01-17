@@ -31,6 +31,7 @@ M.modes = {
 }
 
 --- Sets the current state of the application.
+--
 -- @param mode The mode of the application.
 -- @param time The time of the application.
 -- @param popup The popup of the application.
@@ -41,32 +42,37 @@ M.current_state = {
 }
 
 --- Starts a short break.
--- @treturn nil
+--
+-- @return nil
 M.start_short_break = function()
   M.current_state.mode = M.modes["short_break"]
   M.start_timer()
 end
 
 --- Starts a long break.
--- @treturn nil
+--
+-- @return nil
 M.start_long_break = function()
   M.current_state.mode = M.modes["long_break"]
   M.start_timer()
 end
 
 --- Starts a work session.
--- @treturn nil
+--
+-- @return nil
 M.start_work = function()
   M.current_state.mode = M.modes["work"]
   M.start_timer()
 end
 
 --- Toggles the pause state of the current timer.
--- @treturn nil
+--
+-- @return nil
 M.toggle_pause = function()
   if M.current_state.timer == nil then
     return
   end
+
   if M.current_state.paused then
     M.current_state.paused = false
     M.current_state.timer:start(0, 1000, vim.schedule_wrap(M.tick))
@@ -74,9 +80,12 @@ M.toggle_pause = function()
     M.current_state.paused = true
     M.current_state.timer:stop()
   end
+
+  M.render()
 end
 
 --- Closes the current popup and stops the timer
+--
 -- @return nil
 M.close = function()
   if M.current_state.timer then
@@ -97,6 +106,8 @@ end
 --
 -- @return nil
 M.start_timer = function()
+  M.current_state.paused = false
+
   if M.current_state.timer ~= nil then
     M.current_state.timer:stop()
   end
@@ -117,7 +128,7 @@ end
 -- @function tick
 -- @desc This function is called every second by the timer. It updates the
 --       popup buffer with the current time remaining.
--- @param none
+--
 -- @return none
 M.tick = function()
   if M.current_state.time == 0 then
@@ -125,6 +136,15 @@ M.tick = function()
     M.say_event(M.current_state.mode[1], "end")
   end
 
+  M.render()
+
+  M.current_state.time = M.current_state.time - 1
+end
+
+--- Renders the current state of the pomodoro clock.
+--
+-- @return nil
+M.render = function()
   local lines = {}
 
   local hours = math.floor(M.current_state.time / 3600)
@@ -157,8 +177,6 @@ M.tick = function()
     },
     virt_text_pos = "overlay",
   })
-
-  M.current_state.time = M.current_state.time - 1
 end
 
 --
@@ -171,7 +189,7 @@ M.show_popup = function()
       position = { row = 0, col = "100%" },
       size = {
         width = 38,
-        height = 5,
+        height = 4,
       },
       focusable = false,
       relative = "win",
@@ -183,8 +201,8 @@ M.show_popup = function()
         readonly = false,
       },
       win_options = {
-        winblend = 0,
-        winhighlight = "Normal:Normal,FloatBorder:FloatBorder",
+        winblend = 30,
+        winhighlight = "Normal:,FloatBorder:",
       },
     })
     M.current_state.popup:mount()
