@@ -3,45 +3,45 @@ local Popup = require("nui.popup")
 local Animation = require("pommodoro-clock.animation")
 local Utils = require("pommodoro-clock.utils")
 
+local WIDTH = 38
+local HEIGHT = 4
+
 local M = {}
+
+--- Creates a namespace for the pommodoro clock
+M.namespace_id = vim.api.nvim_create_namespace("PommodoroClock")
 
 ---
 -- @table config
 --
--- @field number animation_duration
--- @field number animation_fps
-M.config = {
-  animation_duration = 300,
-  animation_fps = 30,
-  width = 38,
-  height = 4,
-}
+M.config = {}
+
+function M.defaults()
+  local defaults = {
+    modes = {
+      ["work"] = { "POMMODORO", 25 },
+      ["short_break"] = { "SHORT BREAK", 5 },
+      ["long_break"] = { "LONG BREAK", 30 },
+    },
+    animation_duration = 300,
+    animation_fps = 30,
+  }
+  return defaults
+end
 
 --- Sets up the highlight groups for the pommodoro clock.
 --
 -- @return nil
-M.setup = function()
+M.setup = function(config)
+  config = config or {}
+  M.config = vim.tbl_deep_extend("force", {}, M.defaults(), config)
+
   vim.api.nvim_set_hl(0, "PommodoroClockG1", { fg = "#ccff33" })
   vim.api.nvim_set_hl(0, "PommodoroClockG2", { fg = "#9ef01a" })
   vim.api.nvim_set_hl(0, "PommodoroClockG3", { fg = "#70e000" })
   vim.api.nvim_set_hl(0, "PommodoroClockMin", { fg = "#666666" })
   vim.api.nvim_set_hl(0, "PommodoroClockText", { fg = "#ff3399" })
-
-  M.namespace_id = vim.api.nvim_create_namespace("PommodoroClock")
 end
-
----
--- A table of modes that can be used to set the timer.
---
--- @table modes
--- @field work A table containing the name and duration of a work mode.
--- @field short_break A table containing the name and duration of a short break mode.
--- @field long_break A table containing the name and duration of a long break mode.
-M.modes = {
-  ["work"] = { "POMMODORO", 25 },
-  ["short_break"] = { "SHORT BREAK", 5 },
-  ["long_break"] = { "LONG BREAK", 30 },
-}
 
 --- Sets the current state of the application.
 --
@@ -49,32 +49,16 @@ M.modes = {
 -- @param time The time of the application.
 -- @param popup The popup of the application.
 M.current_state = {
-  mode = M.modes["work"],
+  mode = nil,
   time = nil,
   popup = nil,
 }
 
---- Starts a short break.
+--- Starts the timer.
 --
--- @return nil
-M.start_short_break = function()
-  M.current_state.mode = M.modes["short_break"]
-  M.start_timer()
-end
-
---- Starts a long break.
---
--- @return nil
-M.start_long_break = function()
-  M.current_state.mode = M.modes["long_break"]
-  M.start_timer()
-end
-
---- Starts a work session.
---
--- @return nil
-M.start_work = function()
-  M.current_state.mode = M.modes["work"]
+-- @param mode The mode to start the timer in.
+M.start = function(mode)
+  M.current_state.mode = M.config.modes[mode]
   M.start_timer()
 end
 
@@ -111,8 +95,8 @@ M.close = function()
     local animation = Animation:initialize(M.config.animation_duration, M.config.animation_fps, function(fraction)
       M.current_state.popup:update_layout({
         size = {
-          width = M.config.width + 1 - math.floor(M.config.width * fraction),
-          height = M.config.height,
+          width = WIDTH + 1 - math.floor(WIDTH * fraction),
+          height = HEIGHT,
         },
       })
     end, function()
@@ -212,7 +196,7 @@ M.show_popup = function()
       position = { row = 0, col = "100%" },
       size = {
         width = 1,
-        height = M.config.height,
+        height = HEIGHT,
       },
       focusable = false,
       relative = "win",
@@ -233,8 +217,8 @@ M.show_popup = function()
     local animation = Animation:initialize(M.config.animation_duration, M.config.animation_fps, function(fraction)
       M.current_state.popup:update_layout({
         size = {
-          width = math.floor(M.config.width * fraction),
-          height = M.config.height,
+          width = math.floor(WIDTH * fraction),
+          height = HEIGHT,
         },
       })
     end)

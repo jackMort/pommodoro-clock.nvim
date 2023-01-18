@@ -26,22 +26,38 @@ use({
 })
 ```
 
+## Configuration
+
+`pommodoro-clock.nvim` comes with the following defaults
+
+```lua
+{
+  modes = {
+    ["work"] = { "POMMODORO", 25 },
+    ["short_break"] = { "SHORT BREAK", 5 },
+    ["long_break"] = { "LONG BREAK", 30 },
+  },
+  animation_duration = 300,
+  animation_fps = 30,
+}
+```
+
 ## Usage
 
 Plugin exposes the following public functions, here is a sample of the keybindings using [which-key](https://github.com/folke/which-key.nvim).
 
 ```lua
 local function pc(func)
-  return "<Cmd>lua require('pommodoro-clock')." .. func .. "()<CR>"
+	return "<Cmd>lua require('pommodoro-clock')." .. func .. "<CR>"
 end
 
 p = {
-  name = "Pommodoro",
-  w = { pc("start_work"), "Start Pommodoro" },
-  s = { pc("start_short_break"), "Short Break" },
-  l = { pc("start_long_break"), "Long Break" },
-  c = { pc("toggle_pause"), "Toggle Pause" },
-  c = { pc("close"), "Close" },
+	name = "Pommodoro",
+	w = { pc('start("work")'), "Start Pommodoro" },
+	s = { pc('start("short_break")'), "Short Break" },
+	l = { pc('start("long_break")'), "Long Break" },
+	p = { pc("toggle_pause()"), "Toggle Pause" },
+	c = { pc("close()"), "Close" },
 }
 ```
 
