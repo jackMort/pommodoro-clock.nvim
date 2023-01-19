@@ -26,6 +26,7 @@ function M.defaults()
     animation_duration = 300,
     animation_fps = 30,
     sound = "voice",
+    say_command = "spd-say -l en -t female3",
   }
   return defaults
 end
@@ -233,7 +234,7 @@ end
 
 M.say = function(text)
   if M.config.sound == "voice" then
-    os.execute('spd-say -l en -t female3 "' .. text .. '"')
+    os.execute(M.config.say_command .. ' "' .. text .. '"')
   end
 end
 
