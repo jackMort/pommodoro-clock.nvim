@@ -39,6 +39,7 @@ use({
   },
   animation_duration = 300,
   animation_fps = 30,
+  sound = "voice" -- set to "none" to disable
 }
 ```
 
