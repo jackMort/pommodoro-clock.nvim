@@ -216,6 +216,7 @@ M.show_popup = function()
     })
 
     M.current_state.popup:mount()
+
     local animation = Animation:initialize(M.config.animation_duration, M.config.animation_fps, function(fraction)
       M.current_state.popup:update_layout({
         size = {
@@ -225,6 +226,13 @@ M.show_popup = function()
       })
     end)
     animation:run()
+
+    pcall(vim.api.nvim_create_autocmd, { "WinResized" }, {
+      group = vim.api.nvim_create_augroup("refresh_popup_layout", { clear = true }),
+      callback = function()
+        M.current_state.popup:update_layout()
+      end,
+    })
   end
 end
 
